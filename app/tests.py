@@ -15,7 +15,7 @@ class Ticket29884Test(TestCase):
     def setUp(self):
         make_timestamp_data()
 
-    def find(self):
+    def test_find(self):
         queryset = TimeStampModel.objects.annotate(
             day=TruncDay('timestamp', tzinfo=pytz.timezone('Europe/Berlin'))
         ).filter(
@@ -24,5 +24,3 @@ class Ticket29884Test(TestCase):
         results = list(queryset)
         self.assertGreater(len(results), 0) 
 
-    def test_find(self):
-        self.find()
