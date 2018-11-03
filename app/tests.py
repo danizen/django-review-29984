@@ -1,24 +1,28 @@
 from django.test import TestCase
+import datetime
 import pytz
 
+from django.db.models.functions import *
+from django.utils import timezone
+
 from app.models import TimeStampModel
+from app.data import make_timestamp_data
 
 # Create your tests here.
 
 class Ticket29884Test(TestCase):
 
     def setUp(self):
-        TimeStampModel.objects.bulk_create([
-            TimeStampModel(timestamp=datetime.datetime(2018, 10, 24, 5, 13, tzinfo=pytz.utc)),
-            TimeStampModel(timestamp=datetime.datetime(2018, 10, 24, 7, 4, tzinfo=pytz.utc)),
-            TimeStampModel(timestamp=datetime.datetime(2018, 10, 24, 8, 56, tzinfo=pytz.utc)),
-            TimeStampModel(timestamp=datetime.datetime(2018, 10, 24, 13, 49, tzinfo=pytz.utc)),
-            TimeStampModel(timestamp=datetime.datetime(2018, 10, 24, 15, 33, tzinfo=pytz.utc)),
-            TimeStampModel(timestamp=datetime.datetime(2018, 10, 24, 18, 29, tzinfo=pytz.utc)),
-            TimeStampModel(timestamp=datetime.datetime(2018, 10, 24, 19, 12, tzinfo=pytz.utc)),
-            TimeStampModel(timestamp=datetime.datetime(2018, 10, 24, 21, 37, tzinfo=pytz.utc)),
-            TimeStampModel(timestamp=datetime.datetime(2018, 10, 24, 21, 9, tzinfo=pytz.utc)),
-            TimeStampModel(timestamp=datetime.datetime(2018, 10, 24, 23, 23, tzinfo=pytz.utc)),
-        ])
+        make_timestamp_data()
+
+    def find(self):
+        queryset = TimeStampModel.objects.annotate(
+            day=TruncDay('timestamp', tzinfo=pytz.timezone('Europe/Berlin'))
+        ).filter(
+            day=timezone.make_aware(datetime.datetime(2018, 10, 24), pytz.timezone('Europe/Berlin'))
+        ).values()
+        results = list(queryset)
+        self.assertGreater(len(results), 0) 
 
     def test_find(self):
+        self.find()
