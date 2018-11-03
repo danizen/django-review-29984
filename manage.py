@@ -1,9 +1,12 @@
 #!/usr/bin/env python
 import os
 import sys
+from pathlib import Path
 
 if __name__ == '__main__':
     os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'review.settings')
+    dflt_path = Path(__file__).parent.joinpath('db.sqlite3')
+    os.environ.setdefault('DATABASE_URL', 'sqlite:///'+str(dflt_path))
     try:
         from django.core.management import execute_from_command_line
     except ImportError as exc:
